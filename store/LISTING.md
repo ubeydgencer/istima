@@ -41,6 +41,7 @@ NASIL ÇALIŞIR
 ÖZELLİKLER
 • Her sitede çalışır: haberi sayfadan kendisi ayıklar, menü, reklam ve yorumları atlar.
 • Sayıları, tarihleri, saatleri, para birimlerini ve kısaltmaları Türkçe okunuşlarıyla seslendirir (“1.250,75 TL”, “29 Ekim 1923”, “TBMM”).
+• İki ses modeli: Antalia-2 Mini ve EMA Lightning; ayarlardan seçin.
 • 0,8× ile 1,75× arasında altı hız; hızlandırınca ses incelmez.
 • Önceki / sonraki paragraf, ilerleme çubuğundan atlama, Alt+tık ile istediğiniz paragraftan başlama.
 • Seçili metni sağ tıkla “Seçili metni İstima ile dinle”.

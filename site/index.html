@@ -53,7 +53,7 @@
         "applicationSubCategory": "Text to speech",
         "operatingSystem": "Google Chrome, Microsoft Edge, Brave, Opera, Vivaldi",
         "inLanguage": "tr",
-        "softwareVersion": "1.0.1",
+        "softwareVersion": "1.1.0",
         "image": "https://istima.ubeydgencer.com/assets/og-image.png",
         "screenshot": "https://istima.ubeydgencer.com/assets/img/reading-light.webp",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
@@ -65,6 +65,7 @@
         "isAccessibleForFree": true,
         "featureList": [
           "Türkçe haberleri ayıklar ve tek tıkla okur",
+          "İki açık kaynak Türkçe ses modeli: Antalia-2 Mini ve EMA Lightning",
           "İsteğe bağlı otomatik bulma: her Türkçe haberde köşede Haberi dinle düğmesi",
           "Varsayılan olarak hiçbir siteye erişmez; yalnızca kullanıcı istediğinde okur",
           "Okunan paragrafı sayfada vurgular",
@@ -96,8 +97,8 @@
           { "@type": "Question", "name": "Hangi tarayıcılarda çalışır?", "acceptedAnswer": { "@type": "Answer", "text": "Google Chrome, Microsoft Edge, Brave, Opera, Vivaldi ve Arc gibi Chromium tabanlı tarayıcıların güncel sürümlerinde çalışır." } },
           { "@type": "Question", "name": "Hangi haber sitelerinde çalışır?", "acceptedAnswer": { "@type": "Answer", "text": "Belirli bir site listesi yoktur. İstima açtığınız sayfadaki Türkçe haber metnini kendisi bulur; Anadolu Ajansı, NTV, Hürriyet, Sözcü, Cumhuriyet, Habertürk, Milliyet ve TRT Haber gibi sitelerde denenmiştir." } },
           { "@type": "Question", "name": "Neden tüm sitelere erişim izni istiyor?", "acceptedAnswer": { "@type": "Answer", "text": "Varsayılan olarak istemez; İstima yalnızca kullanıcı simgeye bastığında o sekmeye erişir. Bu izin yalnızca isteğe bağlı Haberleri otomatik bul seçeneği açılırsa istenir ve kontrol tamamen cihazda yapılır." } },
-          { "@type": "Question", "name": "İnternet bağlantısı gerekiyor mu?", "acceptedAnswer": { "@type": "Answer", "text": "Seslendirme için gerekmez. Model eklentiyle birlikte gelir; sayfa açıldıktan sonra okuma tamamen çevrimdışı yapılabilir." } },
-          { "@type": "Question", "name": "Ses kime ait?", "acceptedAnswer": { "@type": "Answer", "text": "Ses sentetiktir ve gerçek bir kişiye ait değildir. PatientDesk AI'ın Apache-2.0 lisanslı açık kaynak modeli Antalia-2 Mini kullanılır." } }
+          { "@type": "Question", "name": "İnternet bağlantısı gerekiyor mu?", "acceptedAnswer": { "@type": "Answer", "text": "Seslendirme için gerekmez. İki ses modeli de eklentiyle birlikte gelir; okuma tamamen çevrimdışı yapılır ve eklenti hiçbir sunucuya bağlanmaz." } },
+          { "@type": "Question", "name": "Ses kime ait?", "acceptedAnswer": { "@type": "Answer", "text": "Ses sentetiktir ve gerçek bir kişiye ait değildir. İki açık kaynak model arasından seçim yapabilirsiniz: PatientDesk AI'ın Antalia-2 Mini modeli ve Canberk Aslan'ın EMA Lightning modeli (ikisi de Apache-2.0)." } }
         ]
       }
     ]
@@ -225,8 +226,8 @@
           </article>
           <article class="feature">
             <span class="f-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 1 0 8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M12 8v4l2.5 2.5M20 4v4h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <h3>Hızı siz seçin</h3>
-            <p>0,8× ile 1,75× arasında altı hız. Hızlandırınca ses incelmez; model konuşmayı o hızda yeniden üretir.</p>
+            <h3>Ses ve hız sizin seçiminiz</h3>
+            <p>İki yerli ses modeli: Antalia-2 Mini ve EMA Lightning. 0,8× ile 1,75× arasında altı hız; hızlanınca ses incelmez, model konuşmayı o hızda üretir.</p>
           </article>
           <article class="feature">
             <span class="f-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h9M5 9h14M5 13h6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M13 13l7 3-3 1-1 3z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
@@ -301,7 +302,7 @@
         </div>
         <dl class="stats">
           <div><dt>Sunucu</dt><dd>0</dd></div>
-          <div><dt>Model büyüklüğü</dt><dd>7,6<small> M parametre</small></dd></div>
+          <div><dt>Ses modeli</dt><dd>2<small> açık kaynak model</small></dd></div>
           <div><dt>Ses kalitesi</dt><dd>48<small> kHz</small></dd></div>
           <div><dt>İlk ses</dt><dd>~1<small> sn</small></dd></div>
         </dl>
@@ -321,9 +322,9 @@
           <details><summary>Hangi tarayıcılarda çalışır?</summary><p>Google Chrome, Microsoft Edge, Brave, Opera, Vivaldi ve Arc gibi Chromium tabanlı tarayıcıların güncel sürümlerinde (Chrome 116 ve üzeri) çalışır.</p></details>
           <details><summary>Hangi haber sitelerinde çalışır?</summary><p>Belirli bir site listesi yoktur. İstima açtığınız sayfadaki Türkçe haber metnini kendisi bulur. Anadolu Ajansı, NTV, Hürriyet, Sözcü, Cumhuriyet, Habertürk, Milliyet ve TRT Haber gibi sitelerde denenmiştir. Köşedeki düğme için ayarlardan “Haberleri otomatik bul” seçeneğini açın; açmazsanız araç çubuğundaki simgeyle okuyabilirsiniz.</p></details>
           <details><summary>Neden “tüm sitelere erişim” izni istiyor?</summary><p>İstemiyor, varsayılan olarak yalnızca siz simgeye bastığınızda o sekmeye erişir. Bu izin sadece “Haberleri otomatik bul” seçeneğini açarsanız istenir, çünkü İstima'nın hangi sitede haber olduğunu önceden bilmesi mümkün değil. Kontrol tamamen cihazınızda yapılır ve hiçbir veri gönderilmez.</p></details>
-          <details><summary>İnternet bağlantısı gerekiyor mu?</summary><p>Seslendirme için gerekmez. Model eklentiyle birlikte gelir (yaklaşık 23 MB); sayfa bir kez açıldıktan sonra okuma tamamen çevrimdışı yapılır.</p></details>
+          <details><summary>İnternet bağlantısı gerekiyor mu?</summary><p>Seslendirme için gerekmez. İki ses modeli de eklentiyle birlikte gelir (toplam yaklaşık 58 MB) ve yalnızca seçtiğiniz model belleğe yüklenir. Okuma tamamen çevrimdışı yapılır; eklenti hiçbir sunucuya bağlanmaz.</p></details>
           <details><summary>Bilgisayarımı yavaşlatır mı?</summary><p>Hayır. Model yalnızca siz okumayı başlattığınızda yüklenir ve konuşmayı gerçek zamandan çok daha hızlı üretir. Okuma bitince kaynaklar serbest bırakılır.</p></details>
-          <details><summary>Ses kime ait?</summary><p>Ses sentetiktir, gerçek bir kişiye ait değildir. PatientDesk AI'ın Apache-2.0 lisanslı açık kaynak modeli <a href="https://huggingface.co/cloud0day3/antalia-mini" rel="noopener" target="_blank">Antalia-2 Mini</a> kullanılır.</p></details>
+          <details><summary>Ses kime ait?</summary><p>Ses sentetiktir, gerçek bir kişiye ait değildir. Ayarlardan iki açık kaynak model arasında seçim yapabilirsiniz: PatientDesk AI'ın <a href="https://huggingface.co/cloud0day3/antalia-mini" rel="noopener" target="_blank">Antalia-2 Mini</a> modeli (varsayılan) ve Canberk Aslan'ın <a href="https://huggingface.co/canberkkkkkk/ema-lightning" rel="noopener" target="_blank">EMA Lightning</a> modeli. İkisi de Apache-2.0 lisanslıdır.</p></details>
           <details><summary>Türkçe dışındaki dilleri okur mu?</summary><p>Hayır, İstima Türkçe için tasarlandı. Türkçe cümle içindeki İngilizce kelimeleri ve marka adlarını Türkçe okunuşlarıyla seslendirir, ancak tamamen İngilizce metinleri okumaz.</p></details>
         </div>
       </div>
@@ -340,7 +341,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span id="store-label">Chrome Web Mağazası'ndan ekle</span>
           </a>
-          <a class="btn btn-ghost btn-lg" href="https://github.com/ubeydgencer/istima/releases/latest/download/istima-1.0.1.zip">Zip olarak indir (v1.0.1)</a>
+          <a class="btn btn-ghost btn-lg" href="https://github.com/ubeydgencer/istima/releases/latest/download/istima-1.1.0.zip">Zip olarak indir (v1.1.0)</a>
         </div>
         <p class="install-note">Chrome, Edge, Brave, Opera ve Vivaldi'de mağazadan tek tıkla kurulur. <a href="https://github.com/ubeydgencer/istima/releases">Sürüm notları</a></p>
         <div class="manual card" id="zip">
@@ -359,7 +360,7 @@
     <section class="credits">
       <div class="container narrow">
         <h2>Teşekkürler</h2>
-        <p>İstima'nın sesi <a href="https://huggingface.co/cloud0day3/antalia-mini" rel="noopener" target="_blank">Antalia-2 Mini</a> modelidir (PatientDesk AI, Apache-2.0). Model, tarayıcıda <a href="https://onnxruntime.ai" rel="noopener" target="_blank">ONNX Runtime Web</a> (MIT) ile çalışır; haber metni <a href="https://github.com/mozilla/readability" rel="noopener" target="_blank">Mozilla Readability</a> (Apache-2.0) ile ayıklanır. Yazı tipleri: Newsreader ve Inter (SIL OFL 1.1). Tarayıcı logoları <a href="https://simpleicons.org" rel="noopener" target="_blank">Simple Icons</a> setinden (CC0); markalar sahiplerine aittir ve yalnızca uyumluluğu göstermek için kullanılmıştır. İstima'nın kendisi de açık kaynaktır: <a href="https://github.com/ubeydgencer/istima">github.com/ubeydgencer/istima</a> (Apache-2.0).</p>
+        <p>İstima'nın sesleri <a href="https://huggingface.co/cloud0day3/antalia-mini" rel="noopener" target="_blank">Antalia-2 Mini</a> (PatientDesk AI) ve <a href="https://huggingface.co/canberkkkkkk/ema-lightning" rel="noopener" target="_blank">EMA Lightning</a> (Canberk Aslan) modelleridir; ikisi de Apache-2.0 lisanslıdır. EMA Lightning desteğini <a href="https://github.com/ubeydgencer/istima/pull/1">Ahmet Bedir</a> ekledi. Modeller tarayıcıda <a href="https://onnxruntime.ai" rel="noopener" target="_blank">ONNX Runtime Web</a> (MIT) ile çalışır; haber metni <a href="https://github.com/mozilla/readability" rel="noopener" target="_blank">Mozilla Readability</a> (Apache-2.0) ile ayıklanır. Yazı tipleri: Newsreader ve Inter (SIL OFL 1.1). Tarayıcı logoları <a href="https://simpleicons.org" rel="noopener" target="_blank">Simple Icons</a> setinden (CC0); markalar sahiplerine aittir ve yalnızca uyumluluğu göstermek için kullanılmıştır. İstima'nın kendisi de açık kaynaktır: <a href="https://github.com/ubeydgencer/istima">github.com/ubeydgencer/istima</a> (Apache-2.0).</p>
       </div>
     </section>
   </main>

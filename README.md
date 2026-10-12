@@ -95,6 +95,12 @@ Siteyi yayınlamak için:
 node tools/site-version.mjs && npx wrangler pages deploy site --project-name istima
 ```
 
+## Katkıda bulunanlar
+
+- [Ahmet Bedir](https://github.com/ahmetbedir): EMA Lightning desteği ve eklenti yeniden yüklenirken açık sekmelerin temizlenmesi ([#1](https://github.com/ubeydgencer/istima/pull/1))
+
+Katkılar memnuniyetle karşılanır; bir hata bildirmek ya da öneride bulunmak için [issue açabilirsiniz](https://github.com/ubeydgencer/istima/issues).
+
 ## Lisans ve teşekkürler
 
 İstima [Apache-2.0](LICENSE) lisanslıdır. Üçüncü taraf bileşenler ve lisansları [NOTICE](NOTICE) dosyasındadır:

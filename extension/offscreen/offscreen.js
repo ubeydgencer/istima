@@ -183,6 +183,15 @@ function stop() {
   setState("stopped");
 }
 
+/** Seconds of silence after a paragraph, so the headline and sub-headings do not run straight into the
+ * text that follows: a heading (no sentence-final punctuation) gets a longer breath than a paragraph. */
+const PAUSE_AFTER_HEADING = 0.75, PAUSE_AFTER_PARAGRAPH = 0.35;
+function pauseAfter(para) {
+  if (!(para < player.paragraphs.length - 1)) return 0;
+  const heading = !/[.!?…:;"”’'»)]$/u.test(player.paragraphs[para].trim());
+  return (heading ? PAUSE_AFTER_HEADING : PAUSE_AFTER_PARAGRAPH) / player.speed;
+}
+
 // ------------------------------------------------------------------ worker events
 function onWorkerMessage({ data: msg }) {
   if (msg.type === "progress") {
@@ -205,6 +214,14 @@ function onWorkerMessage({ data: msg }) {
   } else if (msg.type === "done") {
     if (msg.id !== player.synthBusy) return;
     player.synthBusy = null;
+    const para = Number(msg.id.split(":")[1]);
+    const gap = pauseAfter(para);
+    if (gap > 0) {
+      const ctx = audioCtx();
+      const silence = ctx.createBuffer(1, Math.round(gap * ctx.sampleRate), ctx.sampleRate);
+      player.segments.push({ para, buffer: silence });
+      player.queuedSeconds += silence.duration;
+    }
     pump();
     playNext();
   } else if (msg.type === "error") {
