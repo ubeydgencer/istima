@@ -54,7 +54,7 @@ GİZLİLİK
 
 AÇIK KAYNAK
 İstima Apache-2.0 lisanslı açık kaynaktır: https://github.com/ubeydgencer/istima
-Ses, açık kaynak Antalia-2 Mini modeliyle üretilir. Ses sentetiktir; gerçek bir kişiye ait değildir.
+Ses, açık kaynak Antalia-2 Mini ve EMA Lightning modelleriyle üretilir. Ses sentetiktir; gerçek bir kişiye ait değildir.
 ```
 
 ### Detailed description (English)
@@ -73,6 +73,7 @@ HOW IT WORKS
 FEATURES
 • Works on any site: extracts the article and skips menus, ads and comments.
 • Reads numbers, dates, times, currencies and abbreviations the way they are said in Turkish.
+• Two voices: Antalia-2 Mini and EMA Lightning; pick one in the settings.
 • Six speeds from 0.8× to 1.75× without chipmunk pitch.
 • Previous / next paragraph, seek from the progress bar, Alt-click any paragraph to start there.
 • Right-click any selected text: “Listen to selection with İstima”.
@@ -84,7 +85,7 @@ PRIVACY
 
 OPEN SOURCE
 Apache-2.0: https://github.com/ubeydgencer/istima
-Speech comes from the open-source Antalia-2 Mini model. The voice is synthetic, not a real person's.
+Speech comes from the open-source Antalia-2 Mini and EMA Lightning models. The voice is synthetic, not a real person's.
 ```
 
 ## 3. Gizlilik uygulamaları (Privacy practices)
