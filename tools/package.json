@@ -6,6 +6,8 @@
   "scripts": {
     "setup": "npx @puppeteer/browsers install chrome@stable --path .cache",
     "test": "node e2e.mjs",
+    "test:ema": "node ema-e2e.mjs",
+    "test:context": "node context-e2e.mjs",
     "screenshots": "node screenshots.mjs",
     "assets": "node store-assets.mjs",
     "package": "node package.mjs"

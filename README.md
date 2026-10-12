@@ -25,6 +25,7 @@ Gezdiğiniz sitelerdeki Türkçe haberleri tek tıkla doğal bir sesle okuyan, y
 - **Doğru Türkçe okuma.** Sayılar, tarihler, saatler, para birimleri, kısaltmalar ve metindeki İngilizce kelimeler modelin kendi normalleştiricisiyle okunuşa çevrilir.
 - **Okunan yeri gösterir.** Okunan paragraf vurgulanır, sayfa onu takip eder; <kbd>Alt</kbd>+tık ile istediğiniz paragraftan başlar.
 - **Hız ve kontrol.** 0,8×–1,75× arası altı hız (ses incelmez, model konuşmayı o hızda üretir), paragraf atlama, ilerleme çubuğundan atlama, sekmeler arası kontrol.
+- **İki ses modeli.** Ayarlar → Okuma → Ses modeli bölümünden Antalia-2 Mini veya EMA Lightning seçilebilir. Seçim bir sonraki okumada uygulanır; her iki model de tamamen cihazda çalışır.
 - **Seçili metin.** Sağ tık → “Seçili metni İstima ile dinle”.
 - **Kısayollar.** <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> başlat/duraklat, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> paragraf, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> durdur.
 - **Gizlilik.** Sunucu yok. Metin ve ses cihazdan çıkmaz; analitik, çerez, hesap yok. Seslendirme çevrimdışı çalışır.
@@ -52,8 +53,16 @@ Gezdiğiniz sitelerdeki Türkçe haberleri tek tıkla doğal bir sesle okuyan, y
 
 1. **İçerik betiği** (`extension/content/`), kullanıcı istediğinde (activeTab) ya da otomatik bulma açıksa her sayfada, sayfanın dilini ve yapısını kontrol eder, Readability ile haberi ayıklar, kategori etiketi, künye, “Google'da takip edin” ve telif notu gibi satırları atar ve her paragrafı sayfadaki öğesiyle eşler.
 2. **Arka plan** (`extension/background.js`) okuma oturumunu tutar ve sayfa, popup ve ses belgesi arasında mesajları taşır.
-3. **Offscreen belge** (`extension/offscreen/`) modeli bir Web Worker'da çalıştırır, paragrafları oynatmanın 25 saniye önünden üretir ve Web Audio ile çalar. Eklenti sayfaları çapraz köken yalıtımlı olduğu için ONNX Runtime 4 iş parçacığıyla çalışır: model ~1 saniyede hazır olur ve konuşmayı gerçek zamandan çok daha hızlı üretir.
+3. **Offscreen belge** (`extension/offscreen/`) seçili modeli bir Web Worker'da çalıştırır, paragrafları oynatmanın 25 saniye önünden üretir ve Web Audio ile çalar. Eklenti sayfaları çapraz köken yalıtımlı olduğu için ONNX Runtime donanıma göre en fazla 4 iş parçacığıyla çalışır. Hazırlık ve üretim süresi modele ve donanıma bağlıdır.
 4. **Ses motoru** (`extension/engine/`, `extension/models/`): [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini), 7,6 M parametreli, 48 kHz çıkışlı Türkçe TTS modeli. ONNX grafikleri, Türkçe normalleştirici ve çıkarım kodu modelin [Hugging Face Space'inden](https://huggingface.co/spaces/cloud0day3/antalia-mini) alındı (fp32 akustik + fp16 vocoder, 22,8 MB).
+
+### EMA Lightning desteği
+
+[EMA Lightning](https://huggingface.co/canberkkkkkk/ema-lightning), 8,6 M parametreli ikinci ses modelidir. `extension/models/ema/` altında paketlenen üç float32 ONNX grafiği (text, acoustic, decoder; yaklaşık 35 MB), yerel `ema-tts` projesinin doğrulanmış export'larından alınmıştır. Kaynak revision'ları, model alfabesi ve SHA-256 değerleri `model-info.json` içindedir. Python, PHP veya bir sunucu çalışma zamanında gerekmez.
+
+`extension/engine/ema.js`, EMA'nın karakter/kelime hizalamasını ve kelime sürelerinden frame planlamasını uygular. Decoder ilk ses için 1 saniyelik, devamında 4 saniyelik pencereleri bağlam payıyla işler ve 48 kHz mono PCM üretir. Hız doğrudan modelin sürelerine uygulanır. Model değiştirildiğinde eski Worker kapatılır; aynı anda yalnızca seçili model yüklenir. Mevcut kullanıcılar için varsayılan Antalia-2 Mini olarak kalır.
+
+Tarayıcı sürümü İstima'nın mevcut Türkçe normalleştiricisini EMA'nın kendi alfabesine uyarlar; özgün EMA'nın Rust tabanlı `normalizer-tr` bileşenini içermez. Bu nedenle normalleştirme çıktısı ve ses, Python/PHP EMA sürümleriyle birebir aynı olmak zorunda değildir. Çıkarım grafikleri ve frame planı, sabit upstream fixture ile ayrıca karşılaştırılır.
 
 ## Proje yapısı
 
@@ -71,7 +80,9 @@ Gezdiğiniz sitelerdeki Türkçe haberleri tek tıkla doğal bir sesle okuyan, y
 cd tools
 npm install
 npm run setup        # Chrome for Testing'i indirir (markalı Chrome --load-extension'ı artık desteklemiyor)
-npm test             # eklentiyi gerçek tarayıcıda yükler: tespit, ayıklama, baştan sona okuma, kontroller
+npm test             # tespit, ayıklama, Antalia okuma + EMA parite/oynatma/model değiştirme testleri
+npm run test:ema     # yalnızca EMA ONNX/WASM paritesi ve oynatma kontrolleri
+npm run test:context # eklenti yeniden yükleme, SPA gezinmesi ve eski betik temizliği
 npm test -- https://www.ntv.com.tr/...   # ek olarak gerçek haber sayfalarında ayıklamayı dener
 npm run screenshots  # arayüz ekran görüntüleri + sitenin görselleri ve örnek sesi (cwebp ve ffmpeg gerekir)
 npm run assets       # mağaza görselleri ve OG görseli
@@ -89,6 +100,7 @@ node tools/site-version.mjs && npx wrangler pages deploy site --project-name ist
 İstima [Apache-2.0](LICENSE) lisanslıdır. Üçüncü taraf bileşenler ve lisansları [NOTICE](NOTICE) dosyasındadır:
 
 - **Antalia-2 Mini** ses modeli, Türkçe normalleştirici ve tarayıcı çıkarım kodu: PatientDesk AI, Apache-2.0
+- **EMA Lightning** ses modeli ve uyarlanmış çıkarım/parçalama kodu: Canberk Aslan, Apache-2.0
 - **ONNX Runtime Web**: Microsoft, MIT
 - **Mozilla Readability**: Apache-2.0
 - Site yazı tipleri **Newsreader** ve **Inter**: SIL OFL 1.1
@@ -99,6 +111,6 @@ Ses sentetiktir ve gerçek bir kişiye ait değildir. Lütfen dinleyenlere sente
 
 ## English
 
-**İstima** is a free, open-source Chrome extension that reads Turkish news articles aloud. It finds the article on any site, skips the clutter, highlights the paragraph being read, and speaks with [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini), a 7.6M-parameter Turkish TTS model that runs **entirely on your device** through ONNX Runtime Web (WebAssembly, 4 threads in a cross-origin-isolated offscreen document). No server, no account, no tracking; speech works offline.
+**İstima** is a free, open-source Chrome extension that reads Turkish news articles aloud. It finds the article on any site, skips the clutter, highlights the paragraph being read, and speaks with [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) or [EMA Lightning](https://huggingface.co/canberkkkkkk/ema-lightning), selectable in Settings. Both run **entirely on your device** through ONNX Runtime Web (WebAssembly, up to 4 threads in a cross-origin-isolated offscreen document). No server, no account, no tracking; speech works offline. EMA uses İstima's existing Turkish normalizer adapted to its vocabulary, rather than upstream normalizer-tr.
 
 Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/idnhjopkmlgdhipcfplknfdfpkcehhle), or load the [latest release](https://github.com/ubeydgencer/istima/releases/latest) unpacked. See *Geliştirme* above for the test and build scripts. Licensed under Apache-2.0.

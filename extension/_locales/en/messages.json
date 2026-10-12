@@ -267,7 +267,7 @@
   "message": "İstima uses no server. The article text is processed entirely on your computer by the bundled AI model; no text, audio or usage data is ever sent anywhere."
  },
  "optCredits": {
-  "message": "Voice: <a href=\"https://huggingface.co/cloud0day3/antalia-mini\" target=\"_blank\" rel=\"noopener\">Antalia-2 Mini</a> (PatientDesk AI, Apache-2.0). Runtime: <a href=\"https://onnxruntime.ai\" target=\"_blank\" rel=\"noopener\">ONNX Runtime Web</a> (MIT). Article extraction: <a href=\"https://github.com/mozilla/readability\" target=\"_blank\" rel=\"noopener\">Mozilla Readability</a> (Apache-2.0). The voice is synthetic, not a real person's."
+  "message": "Voice: <a href=\"https://huggingface.co/cloud0day3/antalia-mini\" target=\"_blank\" rel=\"noopener\">Antalia-2 Mini</a> (PatientDesk AI, Apache-2.0), <a href=\"https://huggingface.co/canberkkkkkk/ema-lightning\" target=\"_blank\" rel=\"noopener\">EMA Lightning</a> (Canberk Aslan, Apache-2.0). Runtime: <a href=\"https://onnxruntime.ai\" target=\"_blank\" rel=\"noopener\">ONNX Runtime Web</a> (MIT). Article extraction: <a href=\"https://github.com/mozilla/readability\" target=\"_blank\" rel=\"noopener\">Mozilla Readability</a> (Apache-2.0). The voice is synthetic, not a real person's."
  },
  "optPrivacyLink": {
   "message": "Privacy policy"
@@ -358,5 +358,11 @@
  },
  "welcomeAutoOn": {
   "message": "On ✓"
+ },
+ "optModel": {
+  "message": "Speech model"
+ },
+ "optModelHint": {
+  "message": "Antalia-2 Mini or EMA Lightning. Both run on your device. Your choice applies to the next reading."
  }
 }

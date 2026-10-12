@@ -267,7 +267,7 @@
   "message": "İstima sunucu kullanmaz. Haber metni, sesin üretildiği yapay zekâ modeliyle birlikte tamamen bilgisayarınızda işlenir; hiçbir metin, ses ya da kullanım verisi dışarı gönderilmez."
  },
  "optCredits": {
-  "message": "Ses: <a href=\"https://huggingface.co/cloud0day3/antalia-mini\" target=\"_blank\" rel=\"noopener\">Antalia-2 Mini</a> (PatientDesk AI, Apache-2.0). Çalıştırma: <a href=\"https://onnxruntime.ai\" target=\"_blank\" rel=\"noopener\">ONNX Runtime Web</a> (MIT). Metin ayıklama: <a href=\"https://github.com/mozilla/readability\" target=\"_blank\" rel=\"noopener\">Mozilla Readability</a> (Apache-2.0). Ses sentetiktir; gerçek bir kişiye ait değildir."
+  "message": "Ses: <a href=\"https://huggingface.co/cloud0day3/antalia-mini\" target=\"_blank\" rel=\"noopener\">Antalia-2 Mini</a> (PatientDesk AI, Apache-2.0), <a href=\"https://huggingface.co/canberkkkkkk/ema-lightning\" target=\"_blank\" rel=\"noopener\">EMA Lightning</a> (Canberk Aslan, Apache-2.0). Çalıştırma: <a href=\"https://onnxruntime.ai\" target=\"_blank\" rel=\"noopener\">ONNX Runtime Web</a> (MIT). Metin ayıklama: <a href=\"https://github.com/mozilla/readability\" target=\"_blank\" rel=\"noopener\">Mozilla Readability</a> (Apache-2.0). Ses sentetiktir; gerçek bir kişiye ait değildir."
  },
  "optPrivacyLink": {
   "message": "Gizlilik politikası"
@@ -358,5 +358,11 @@
  },
  "welcomeAutoOn": {
   "message": "Açık ✓"
+ },
+ "optModel": {
+  "message": "Ses modeli"
+ },
+ "optModelHint": {
+  "message": "Antalia-2 Mini veya EMA Lightning. Her ikisi de cihazınızda çalışır. Seçim bir sonraki okumada uygulanır."
  }
 }

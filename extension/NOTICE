@@ -44,3 +44,16 @@ MIT License (see vendor/ort/LICENSE)
 Mozilla Readability 0.6.0 (vendor/readability/)
 Copyright (c) 2010 Arc90 Inc
 Apache License 2.0 (see vendor/readability/LICENSE.md)
+
+--------------------------------------------------------------------------------
+EMA Lightning 1.0.1 (models/ema/*.onnx, models/ema/model-info.json, engine/ema.js)
+Author: Canberk Aslan
+https://github.com/canberk7/ema-lightning
+https://huggingface.co/canberkkkkkk/ema-lightning
+Apache License 2.0 (see LICENSE)
+
+Browser inference, word/frame planning and chunking adapted by İstima from EMA Lightning.
+Code revision: 129e39c7d9feb56de9c6830e94a630f04fc8aa03
+Weights revision: 7a6ba1ad216bb2f1da9863f80ac8770a6a807632
+ONNX graphs exported by the local ema-tts project (opset 17, float32).
+The browser uses İstima's existing Turkish normalizer, not upstream normalizer-tr.

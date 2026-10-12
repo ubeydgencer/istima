@@ -35,6 +35,10 @@ function renderPosition() {
   for (const b of $("position").children) b.setAttribute("aria-pressed", String(b.dataset.value === settings.position));
 }
 
+function renderModel() {
+  for (const b of $("model").children) b.setAttribute("aria-pressed", String(b.dataset.value === settings.model));
+}
+
 function renderSites() {
   const list = $("sites");
   list.replaceChildren();
@@ -109,6 +113,11 @@ chrome.runtime.onMessage.addListener((msg) => {
     input.addEventListener("change", () => save({ [input.dataset.key]: input.checked }));
   }
   renderSpeed();
+  renderModel();
+  for (const b of $("model").children) b.addEventListener("click", async () => {
+    await save({ model: b.dataset.value });
+    renderModel();
+  });
   renderPosition();
   const auto = $("auto-detect");
   const renderAuto = async () => {

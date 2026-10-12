@@ -5,7 +5,7 @@
   globalThis.__istimaLoaded = true;
 
   // a copy of shared/settings.js (content scripts cannot import modules)
-  const DEFAULTS = { speed: 1, readTitle: true, highlight: true, autoScroll: true, showButton: true, autoPlay: false, position: "right", disabledSites: [] };
+  const DEFAULTS = { model: "antalia", speed: 1, readTitle: true, highlight: true, autoScroll: true, showButton: true, autoPlay: false, position: "right", disabledSites: [] };
   const SPEEDS = [0.8, 1, 1.15, 1.3, 1.5, 1.75];
   const CHARS_PER_SECOND = 14; // Turkish speech at the voice's own pace
   const HL_CLASS = "istima-reading";
@@ -14,8 +14,48 @@
   let article = null; // {url, title, site, paragraphs, els, isTurkish, isArticle, chars}
   let session = null, engine = null, isThisTab = false;
   let ui = null, pillDismissed = false, highlighted = null;
+  let disposed = false, navigationTimer = null, idleHandle = null, highlightStyle = null;
+  const playerUI = globalThis.IstimaUI;
+  const domEvents = new AbortController();
+  const timeouts = new Set();
 
-  const send = (msg) => chrome.runtime.sendMessage(msg).catch(() => null);
+  // Reloading/updating an extension invalidates its API, but the old page's JS timers survive.
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    clearInterval(navigationTimer);
+    for (const timer of timeouts) clearTimeout(timer);
+    timeouts.clear();
+    if (idleHandle != null) window.cancelIdleCallback(idleHandle);
+    domEvents.abort();
+    ui?.host.remove();
+    clearHighlight();
+    highlightStyle?.remove();
+    if (globalThis.IstimaUI === playerUI) {
+      delete globalThis.IstimaUI;
+      delete globalThis.__istimaLoaded;
+    }
+  }
+
+  function isActive() {
+    if (!disposed && playerUI.isActive()) return true;
+    dispose();
+    return false;
+  }
+
+  function later(fn, delay) {
+    const timer = setTimeout(() => {
+      timeouts.delete(timer);
+      if (isActive()) fn();
+    }, delay);
+    timeouts.add(timer);
+  }
+
+  async function send(msg) {
+    if (!isActive()) return null;
+    try { return await chrome.runtime.sendMessage(msg); }
+    catch { isActive(); return null; }
+  }
   const host = location.hostname.replace(/^www\./, "");
   const siteDisabled = () => settings.disabledSites.some((d) => host === d || host.endsWith(`.${d}`));
 
@@ -187,6 +227,7 @@
     if (!document.getElementById("istima-highlight-style")) {
       const style = document.createElement("style");
       style.id = "istima-highlight-style";
+      highlightStyle = style;
       style.textContent = `.${HL_CLASS}{background-color:rgba(200,30,58,.09)!important;box-shadow:0 0 0 6px rgba(200,30,58,.09)!important;border-radius:4px!important;transition:background-color .3s,box-shadow .3s!important;scroll-margin:30vh!important}@media (prefers-color-scheme:dark){.${HL_CLASS}{background-color:rgba(240,86,110,.16)!important;box-shadow:0 0 0 6px rgba(240,86,110,.16)!important}}`;
       document.head.append(style);
     }
@@ -200,6 +241,7 @@
 
   let lastIndex = -1;
   function render() {
+    if (!isActive()) return;
     const active = isThisTab && session && session.state !== "stopped";
     const offer = !active && article?.isTurkish && article.isArticle && settings.showButton && !siteDisabled() && !pillDismissed;
     if (!active && !offer) {
@@ -223,6 +265,7 @@
 
   // ------------------------------------------------------------------ messages
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    if (!isActive()) return;
     if (msg?.type === "istima-state") {
       session = msg.session;
       engine = msg.engine;
@@ -246,6 +289,7 @@
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
+    if (!isActive()) return;
     if (area !== "sync") return;
     for (const [k, { newValue }] of Object.entries(changes)) settings[k] = newValue ?? DEFAULTS[k];
     render();
@@ -253,6 +297,7 @@
 
   // Alt+click on a paragraph: read from there
   document.addEventListener("click", (e) => {
+    if (!isActive()) return;
     if (!e.altKey || !article?.paragraphs.length) return;
     const { els } = readingList(article);
     const i = els.findIndex((el) => el && el.contains(e.target));
@@ -261,32 +306,42 @@
     e.stopPropagation();
     if (isThisTab && session && session.url === article.url) control("seek", i);
     else startReading(i);
-  }, true);
+  }, { capture: true, signal: domEvents.signal });
 
   // ------------------------------------------------------------------ start-up and SPA navigation
   async function init() {
-    settings = { ...DEFAULTS, ...(await chrome.storage.sync.get(null)) };
+    if (!isActive()) return;
+    try { settings = { ...DEFAULTS, ...(await chrome.storage.sync.get(null)) }; }
+    catch (error) { if (!isActive()) return; throw error; }
+    if (!isActive()) return;
     const state = await send({ type: "get-state" });
+    if (!isActive()) return;
     if (state?.isThisTab) { session = state.session; engine = state.engine; isThisTab = true; }
     // pages that render their article late get two more looks
     let tries = 0;
     const run = () => {
+      if (!isActive()) return;
       article = analyse();
       render();
-      if (!article.isArticle && ++tries < 3) { setTimeout(run, tries * 2500); return; }
+      if (!article.isArticle && ++tries < 3) { later(run, tries * 2500); return; }
       if (settings.autoPlay && article.isTurkish && article.isArticle && !siteDisabled() && !(isThisTab && session)) startReading(0);
     };
-    const idle = () => (window.requestIdleCallback ? requestIdleCallback(run, { timeout: 1500 }) : setTimeout(run, 300));
+    const idle = () => {
+      if (!isActive()) return;
+      if (window.requestIdleCallback) idleHandle = requestIdleCallback(() => { idleHandle = null; run(); }, { timeout: 1500 });
+      else later(run, 300);
+    };
     if (document.readyState === "complete") idle();
-    else addEventListener("load", idle, { once: true });
+    else addEventListener("load", idle, { once: true, signal: domEvents.signal });
   }
 
   let lastUrl = location.href;
-  setInterval(() => {
+  navigationTimer = setInterval(() => {
+    if (!isActive()) return;
     if (location.href === lastUrl) return;
     lastUrl = location.href;
     pillDismissed = false;
-    setTimeout(() => { article = analyse(); render(); }, 1200);
+    later(() => { article = analyse(); render(); }, 1200);
   }, 1000);
 
   init();

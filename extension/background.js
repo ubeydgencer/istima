@@ -1,6 +1,6 @@
 // İstima background service worker: keeps the reading session, routes controls between the page,
 // the popup and the offscreen audio document, and owns the context menu, shortcuts and badge.
-import { DEFAULTS, getSettings } from "./shared/settings.js";
+import { DEFAULTS, getSettings, modelId } from "./shared/settings.js";
 
 const OFFSCREEN_URL = "offscreen/offscreen.html";
 const CONTENT_FILES = ["vendor/readability/Readability-readerable.js", "vendor/readability/Readability.js", "content/player-ui.js", "content/content.js"];
@@ -73,20 +73,23 @@ async function toOffscreen(msg, tries = 20) {
 }
 
 // ------------------------------------------------------------------ reading
-async function start({ tabId = null, url = "", title = "", site = "", paragraphs, index = 0, source = "page" }) {
+async function start({ tabId = null, url = "", title = "", site = "", paragraphs, index = 0, source = "page", model }) {
   await ready;
   paragraphs = (paragraphs || []).map((p) => String(p).trim()).filter(Boolean);
   if (!paragraphs.length) return { ok: false, error: "empty" };
   const settings = await getSettings();
   const previousTab = session?.tabId;
-  session = { tabId, url, title, site, paragraphs, index, total: paragraphs.length, state: "loading", speed: session?.speed ?? settings.speed, source };
+  session = { tabId, url, title, site, paragraphs, index, total: paragraphs.length, state: "loading", speed: session?.speed ?? settings.speed, source, model: modelId(model ?? settings.model) };
+  const reading = session;
   await saveSession();
+  if (session !== reading) return { ok: true };
   if (previousTab != null && previousTab !== tabId) {
     chrome.tabs.sendMessage(previousTab, { type: "istima-state", session: null, engine }).catch(() => {});
   }
   broadcast();
   await ensureOffscreen();
-  await toOffscreen({ type: "play", session: { paragraphs, index, speed: session.speed } });
+  if (session !== reading) return { ok: true };
+  await toOffscreen({ type: "play", session: { paragraphs, index, speed: reading.speed, model: reading.model } });
   return { ok: true };
 }
 
@@ -97,10 +100,12 @@ async function control(action, value) {
     return { ok: false };
   }
   if (action === "stop") {
+    const previousTab = session.tabId;
     session = null;
     await saveSession();
     if (await hasOffscreen()) await toOffscreen({ type: "stop" }).catch(() => {});
     broadcast();
+    if (previousTab != null) chrome.tabs.sendMessage(previousTab, { type: "istima-state", session: null, engine }).catch(() => {});
     return { ok: true };
   }
   if (action === "speed") {
@@ -190,7 +195,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     case "control":
       return reply(control(msg.action, msg.value));
     case "preload":
-      return reply(ensureOffscreen().then(() => toOffscreen({ type: "preload" })));
+      return reply(getSettings().then(async ({ model }) => {
+        await ensureOffscreen();
+        return toOffscreen({ type: "preload", model });
+      }));
   }
 });
 

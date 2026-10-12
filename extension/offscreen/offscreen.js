@@ -2,10 +2,13 @@
 // The background service worker sends {target: "offscreen", type, ...}; this page answers with
 // {target: "background", type: "engine" | "status", ...}.
 
-const BASE_SPEED = 0.95; // the model's own default pace, shown to the user as 1×
+import { modelId } from "../shared/settings.js";
+
+const BASE_SPEED = { antalia: 0.95, ema: 1 }; // each model's natural pace is shown as 1×
 const AHEAD_SECONDS = 25; // keep at least this much audio synthesised ahead of playback
 
-const worker = new Worker(new URL("../engine/worker.js", import.meta.url), { type: "module" });
+let worker = null;
+let selectedModel = null;
 let engineState = "idle"; // idle | loading | ready | error
 let engineReady = null;
 let resolveReady, rejectReady;
@@ -14,12 +17,32 @@ function emit(msg) {
   chrome.runtime.sendMessage({ target: "background", ...msg }).catch(() => {});
 }
 
-function loadEngine() {
+function loadEngine(model = selectedModel || "antalia") {
+  model = modelId(model);
+  if (selectedModel !== model || engineState === "error") {
+    worker?.terminate();
+    rejectReady?.(new Error("Speech model changed"));
+    selectedModel = model;
+    engineReady = null;
+    worker = new Worker(new URL("../engine/worker.js", import.meta.url), { type: "module" });
+    const currentWorker = worker;
+    worker.onmessage = (event) => { if (worker === currentWorker) onWorkerMessage(event); };
+    worker.onerror = (event) => {
+      if (worker !== currentWorker) return;
+      engineState = "error";
+      engineReady = null;
+      const error = event.message || "Speech worker failed";
+      rejectReady?.(new Error(error));
+      resetQueue();
+      emit({ type: "engine", state: "error", error });
+      setState("error", { error });
+    };
+  }
   if (engineReady) return engineReady;
   engineState = "loading";
   emit({ type: "engine", state: "loading", loaded: 0, total: 0 });
   engineReady = new Promise((res, rej) => { resolveReady = res; rejectReady = rej; });
-  worker.postMessage({ type: "init" });
+  worker.postMessage({ type: "init", model });
   return engineReady;
 }
 
@@ -65,17 +88,21 @@ function resetQueue() {
   }
 }
 
-async function play({ paragraphs, index = 0, speed = 1 }) {
+async function play({ paragraphs, index = 0, speed = 1, model = "antalia" }) {
   resetQueue();
+  const gen = player.gen;
   player.paragraphs = paragraphs;
   player.index = player.synthNext = Math.max(0, Math.min(index, paragraphs.length - 1));
   player.speed = speed;
   const ctx = audioCtx();
   if (ctx.state === "suspended") await ctx.resume();
-  if (engineState !== "ready") {
+  if (gen !== player.gen) return;
+  if (engineState !== "ready" || selectedModel !== modelId(model)) {
     setState("loading");
-    try { await loadEngine(); } catch { return; }
+    try { await loadEngine(model); } catch { return; }
   }
+  if (gen !== player.gen) return;
+  if (player.state === "paused") { pump(); return; }
   setState("buffering");
   pump();
 }
@@ -98,7 +125,7 @@ function pump() {
   const para = player.synthNext++;
   const id = `${player.gen}:${para}`;
   player.synthBusy = id;
-  worker.postMessage({ type: "synth", id, text: player.paragraphs[para], speed: BASE_SPEED * player.speed, seed: 0 });
+  worker.postMessage({ type: "synth", id, text: player.paragraphs[para], speed: BASE_SPEED[selectedModel] * player.speed, seed: 0 });
 }
 
 function playNext() {
@@ -157,13 +184,15 @@ function stop() {
 }
 
 // ------------------------------------------------------------------ worker events
-worker.onmessage = ({ data: msg }) => {
+function onWorkerMessage({ data: msg }) {
   if (msg.type === "progress") {
     emit({ type: "engine", state: "loading", loaded: msg.loaded, total: msg.total });
   } else if (msg.type === "ready") {
     engineState = "ready";
     emit({ type: "engine", state: "ready", info: msg.info });
     resolveReady(msg.info);
+    // A seek/speed command may have replaced the pending play() while the model loaded.
+    if (player.paragraphs.length) pump();
   } else if (msg.type === "chunk") {
     const [gen, para] = msg.id.split(":").map(Number);
     if (gen !== player.gen) return;
@@ -194,7 +223,7 @@ worker.onmessage = ({ data: msg }) => {
     pump();
     playNext();
   }
-};
+}
 
 // ------------------------------------------------------------------ messages from the background
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -203,7 +232,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     case "ping":
       sendResponse({ ok: true, hasSession: player.paragraphs.length > 0, state: player.state, engine: engineState });
       return;
-    case "preload": loadEngine().catch(() => {}); break;
+    case "preload":
+      // An options/welcome preview must not replace the engine of an active reading.
+      if (!player.paragraphs.length) loadEngine(msg.model).catch(() => {});
+      break;
     case "play": play(msg.session); break;
     case "pause": pause(); break;
     case "resume": resume(); break;

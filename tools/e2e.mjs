@@ -68,6 +68,7 @@ await check("pause, resume, seek and stop", async () => {
   await ctl.send({ type: "control", action: "stop" });
   await sleep(300);
   assert.equal((await ctl.state()).session, null);
+  assert.equal(await page.evaluate(() => document.querySelectorAll(".istima-reading").length), 0);
 });
 
 for (const extra of process.argv.slice(2)) {
@@ -85,5 +86,7 @@ for (const extra of process.argv.slice(2)) {
 
 await browser.close();
 server.close();
+if (!failures) await import("./ema-e2e.mjs");
+if (!failures) await import("./context-e2e.mjs");
 console.log(failures ? `\n${failures} failed` : "\nall passed");
 process.exit(failures ? 1 : 0);

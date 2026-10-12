@@ -2,7 +2,17 @@
 // Exposes globalThis.IstimaUI.create(handlers) -> controller. Loaded before content.js.
 (() => {
   if (globalThis.IstimaUI) return;
-  const t = (key, subs) => chrome.i18n.getMessage(key, subs) || key;
+  const isActive = () => {
+    try { return !!chrome.runtime?.id; } catch { return false; }
+  };
+  const t = (key, subs) => {
+    if (!isActive()) return "";
+    try { return chrome.i18n.getMessage(key, subs) || key; }
+    catch (error) {
+      if (!isActive() || error.message?.includes("Extension context invalidated")) return "";
+      throw error;
+    }
+  };
 
   // each logo gets its own gradient id: a gradient inside a hidden (display: none) copy would not paint
   let gradients = 0;
@@ -224,5 +234,5 @@ svg { display: block; width: 100%; height: 100%; }
     };
   }
 
-  globalThis.IstimaUI = { create };
+  globalThis.IstimaUI = { create, isActive };
 })();
